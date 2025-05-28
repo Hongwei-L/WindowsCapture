@@ -11,8 +11,10 @@ struct MonitorInfo
 		: hMonitor(monitorHandle)
 	{
 		MONITORINFO mi = {};
+		mi.cbSize = sizeof(MONITORINFO);
 		if (GetMonitorInfo(hMonitor, &mi))
 		{
+			isPrimary = mi.dwFlags & MONITORINFOF_PRIMARY;
 			rcWorkArea = mi.rcMonitor;
 			//SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWorkArea, 0);
 		}
@@ -23,6 +25,7 @@ struct MonitorInfo
 		}
 	}
 	HMONITOR hMonitor;
+	BOOL isPrimary = FALSE; // Not used in this example, but can be set if needed
 	RECT rcMonitor;
 	RECT rcWorkArea;
 };
@@ -50,7 +53,13 @@ int main()
 
 	assert(!mon.empty());
 
-	cap.SetCaptureTarget(mon[0].hMonitor);
+	for (MonitorInfo m : mon)
+		if (m.isPrimary)
+		{
+			cap.SetCaptureTarget(m.hMonitor);
+			break;
+		}
+		  
 
 	while (true)
 	{
