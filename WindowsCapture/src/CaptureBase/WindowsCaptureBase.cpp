@@ -20,11 +20,11 @@ bool WindowsCaptureBase::Init()
 	return true;
 }
 
-bool WindowsCaptureBase::SetCaptureTarget(const HWND& m_Hwnd)
+bool WindowsCaptureBase::SetCaptureTarget(const HMONITOR& hmon)
 {
 	auto activation_factory = winrt::get_activation_factory<winrt::Windows::Graphics::Capture::GraphicsCaptureItem>();
 	auto interop_factory = activation_factory.as<IGraphicsCaptureItemInterop>();
-	interop_factory->CreateForWindow(m_Hwnd, winrt::guid_of<ABI::Windows::Graphics::Capture::IGraphicsCaptureItem>(), reinterpret_cast<void**>(winrt::put_abi(this->m_item)));
+	interop_factory->CreateForMonitor(hmon, winrt::guid_of<ABI::Windows::Graphics::Capture::IGraphicsCaptureItem>(), reinterpret_cast<void**>(winrt::put_abi(this->m_item)));
 	ItemSize = m_item.Size();
 	LastSize = ItemSize;
 	m_swapChain = CreateDXGISwapChain(
@@ -107,7 +107,7 @@ void WindowsCaptureBase::OnFrameArrived(winrt::Windows::Graphics::Capture::Direc
 	if (m_swapChain != nullptr)
 	{
 		DXGI_PRESENT_PARAMETERS presentParameters = { 0 };
-		m_swapChain->Present1(1, 0, &presentParameters);
+		//m_swapChain->Present1(1, 0, &presentParameters);
 	}
 
 

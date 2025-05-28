@@ -21,7 +21,7 @@ class WindowsCaptureBase
 public:
 	WindowsCaptureBase() { Init(); }
 
-	bool SetCaptureTarget(const HWND& hwnd);
+	bool SetCaptureTarget(const HMONITOR& hMon);
 	void SetFps(const int& fps) { FPS = fps; TimeCur = 1000 / fps; }
 	cv::Mat GetCaptureImage();
 private:
@@ -31,7 +31,7 @@ private:
 	cv::ocl::Context  m_oclCtx;
 
 	int FPS = 60;
-	float TimeCur = 1000.0 / 60;
+	float TimeCur = 1000.0f / 60;
 	//  set mutex   in   func"OnFrameArrived"  to help get cv::mat;
 	std::mutex ImageMutex;
 

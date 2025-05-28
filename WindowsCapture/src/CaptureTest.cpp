@@ -3,17 +3,54 @@
 
 
 #include <Windows.h>
+#include <vector>
+
+struct MonitorInfo
+{
+	MonitorInfo(HMONITOR monitorHandle)
+		: hMonitor(monitorHandle)
+	{
+		MONITORINFO mi = {};
+		if (GetMonitorInfo(hMonitor, &mi))
+		{
+			rcWorkArea = mi.rcMonitor;
+			//SystemParametersInfo(SPI_GETWORKAREA, 0, &rcWorkArea, 0);
+		}
+		else
+		{
+			rcMonitor = { 0, 0, 0, 0 };
+			rcWorkArea = { 0, 0, 0, 0 };
+		}
+	}
+	HMONITOR hMonitor;
+	RECT rcMonitor;
+	RECT rcWorkArea;
+};
+
+std::vector<MonitorInfo> EnumerateAllMonitors()
+{
+	std::vector<MonitorInfo> monitors;
+	EnumDisplayMonitors(nullptr, nullptr, [](HMONITOR hmon, HDC, LPRECT, LPARAM lparam)
+	{
+		auto& monitors = *reinterpret_cast<std::vector<MonitorInfo>*>(lparam);
+		monitors.push_back(MonitorInfo(hmon));
+
+		return TRUE;
+	}, reinterpret_cast<LPARAM>(&monitors));
+
+	return monitors;
+}
+
 
 int main()
 {
 	WindowsCaptureBase cap;
 
-	// 获取窗口句柄  这种方式只能获取  win32 窗口
-	HWND hwnd = FindWindow(NULL, NULL);
-	// 还有另一种方式可以枚举所有桌面上可以用本方法进行截图的窗口
+	std::vector<MonitorInfo> mon = EnumerateAllMonitors();
 
+	assert(!mon.empty());
 
-	cap.SetCaptureTarget(hwnd);
+	cap.SetCaptureTarget(mon[0].hMonitor);
 
 	while (true)
 	{
@@ -23,6 +60,7 @@ int main()
 			cv::imshow("1", ma);
 			cv::waitKey(1);
 		}
+		Sleep(50);
 	}
 
 
