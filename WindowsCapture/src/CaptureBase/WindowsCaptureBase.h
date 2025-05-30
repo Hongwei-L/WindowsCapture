@@ -14,6 +14,12 @@
 #include <opencv2/core/directx.hpp>	
 
 
+//const buffer
+struct ScaleBuffer
+{
+	float scaleX, scaleY;
+	float offsetX, offsetY;
+};
 
 class WindowsCaptureBase
 {
@@ -38,12 +44,36 @@ private:
 	//// set a bool to change the Directx2d source save
 	bool SaveTexture2d_bool = true;
 
+	//眼镜分辨率
+	const int glass_width = 1920;
+	const int glass_height = 1080;
+	
+	///////////////////////////////// 
+	// 缩放相关资源	
+	
+	//眼镜纹理，缩放时作为RTV，输出到眼镜时作为texture
+	winrt::com_ptr<ID3D11Texture2D> offscreenTex;
+	winrt::com_ptr<ID3D11RenderTargetView> offscreenRTV;
+
+	winrt::com_ptr<ID3D11VertexShader> vs;
+	winrt::com_ptr<ID3D11PixelShader> ps;
+
+	// 常量缓冲区
+	winrt::com_ptr<ID3D11Buffer> scaleCB;
+	// 缩放系数和偏移量
+	float sx, sy, ox, oy; 
+
+	void CaculateScale();
+	bool ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>& textureSRV);
+	//////////////////////////////////
+
 
 	// directx3d 
 	winrt::com_ptr<ID3D11Device> d3dDevice{ nullptr };
 	winrt::com_ptr< ID3D11DeviceContext>  d3dContext{ nullptr };
 	winrt::com_ptr<IDXGISwapChain1> m_swapChain{ nullptr };
 
+	//Winrt封装的d3d对象
 	winrt::Windows::Graphics::DirectX::Direct3D11::IDirect3DDevice device{};
 
 	//  WindowsCapture core

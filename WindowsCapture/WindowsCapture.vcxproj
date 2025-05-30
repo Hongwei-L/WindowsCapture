@@ -140,6 +140,11 @@
     <ClCompile Include="src\CaptureBase\WindowsCaptureBase.cpp" />
     <ClCompile Include="src\CaptureTest.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders.hlsl">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>

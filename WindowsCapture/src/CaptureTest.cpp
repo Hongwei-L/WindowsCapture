@@ -69,7 +69,7 @@ int main()
 			cv::imshow("1", ma);
 			cv::waitKey(1);
 		}
-		Sleep(50);
+		Sleep(14);
 	}
 
 
