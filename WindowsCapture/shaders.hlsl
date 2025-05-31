@@ -8,26 +8,28 @@ cbuffer ScaleBuffer : register(b0)
     float offsetX, offsetY;
 };
 
-struct VSOut
-{
-    float4 pos : SV_POSITION;
-    float2 uv : TEXCOORD0;
+struct VSInput {
+    float3 pos : POSITION;
+    float2 uv : TEXCOORD;
 };
 
-VSOut VSMain(uint id : SV_VertexID)
-{
-    float2 pos[4] = { float2(-1,-1), float2(-1,1), float2(1,-1), float2(1,1) };
-    float2 uv[4] = { float2(0,1), float2(0,0), float2(1,1), float2(1,0) };
+struct PSInput {
+    float4 pos : SV_POSITION;
+    float2 uv : TEXCOORD;
+};
 
-    VSOut o;
-    o.pos = float4(pos[id], 0, 1);
-    o.uv = uv[id];
-    return o;
+PSInput VSMain(VSInput input) {
+    PSInput output;
+    output.pos = float4(input.pos, 1.0);
+    output.uv = input.uv;
+    return output;
 }
 
-float4 PSMain(VSOut input) : SV_TARGET
+float4 PSMain(PSInput input) : SV_TARGET
 {
     float2 uv = (input.uv - float2(offsetX, offsetY)) / float2(scaleX, scaleY);
-    if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return float4(0,0,0,1);
-    return inputTex.Sample(linearSampler, uv);
+    //if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return float4(0,0,0,1);
+    
+    //return inputTex.Sample(linearSampler, uv);
+    return float4(0, 0.3, 0.5, 1);
 }

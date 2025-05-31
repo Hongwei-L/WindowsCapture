@@ -8,6 +8,7 @@
 #include <winrt/Windows.Graphics.Capture.h>
 #include <Windows.Graphics.Capture.Interop.h>
 #include <d3d11.h>
+#include <DirectXMath.h>
 #include <dxgi1_2.h>
 #include <mutex>
 #include <opencv2/opencv.hpp>
@@ -57,6 +58,14 @@ private:
 
 	winrt::com_ptr<ID3D11VertexShader> vs;
 	winrt::com_ptr<ID3D11PixelShader> ps;
+
+	winrt::com_ptr<ID3D11Buffer> vertexBuffer;
+	winrt::com_ptr<ID3D11InputLayout> inputLayout;
+
+	winrt::com_ptr<ID3D11SamplerState> sampler;
+
+	// 图片纹理资源视图
+	winrt::com_ptr<ID3D11ShaderResourceView> picsrv;
 
 	// 常量缓冲区
 	winrt::com_ptr<ID3D11Buffer> scaleCB;
