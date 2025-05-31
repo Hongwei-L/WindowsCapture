@@ -73,7 +73,7 @@ private:
 	float sx, sy, ox, oy; 
 
 	void CaculateScale();
-	bool ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>& textureSRV);
+	bool ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>& textureSRV,UINT32 srcW,UINT32 srcH);
 	//////////////////////////////////
 
 

@@ -74,7 +74,7 @@ void CreateOffscreenTarget(ID3D11Device* device, UINT w, UINT h, winrt::com_ptr<
 {
 	D3D11_TEXTURE2D_DESC desc = {};
 	desc.Width = w; desc.Height = h;
-	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	desc.Usage = D3D11_USAGE_DEFAULT;
 	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
 	desc.MipLevels = 1; desc.ArraySize = 1;
@@ -102,7 +102,7 @@ winrt::com_ptr<ID3DBlob> CompileShader(const wchar_t* file, const char* entry, c
 bool WindowsCaptureBase::Init()
 {
 	//Create Direct 3D Device
-	winrt::check_hresult(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT ,
+	winrt::check_hresult(D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_BGRA_SUPPORT | D3D11_CREATE_DEVICE_DEBUG,
 		nullptr, 0, D3D11_SDK_VERSION, d3dDevice.put(), nullptr, nullptr));
 
 	d3dDevice->GetImmediateContext(d3dContext.put());
@@ -213,7 +213,7 @@ cv::Mat WindowsCaptureBase::GetCaptureImage()
 	return resMat.clone();
 }
 
-bool WindowsCaptureBase::ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>& textureSRV)
+bool WindowsCaptureBase::ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>& textureSRV, UINT32 srcW, UINT32 srcH)
 {
 	D3D11_MAPPED_SUBRESOURCE mapped = {};
 	winrt::check_hresult(d3dContext->Map(scaleCB.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped));
@@ -227,7 +227,13 @@ bool WindowsCaptureBase::ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>
 	ID3D11RenderTargetView* rtv = offscreenRTV.get();
 	d3dContext->OMSetRenderTargets(1, &rtv, nullptr);
 
-	float clear[4] = { 0,0.5,1,1 };
+
+	D3D11_VIEWPORT viewport = {};
+	viewport.Width = srcW;
+	viewport.Height = srcH;
+	d3dContext->RSSetViewports(1, &viewport);
+
+	float clear[4] = { 0,1,0,1 };
 	d3dContext->ClearRenderTargetView(offscreenRTV.get(), clear);
 
 	d3dContext->IASetInputLayout(inputLayout.get());
@@ -242,8 +248,8 @@ bool WindowsCaptureBase::ScaleImage_GPU(winrt::com_ptr<ID3D11ShaderResourceView>
 	d3dContext->PSSetShader(ps.get(), nullptr, 0);
 	
 
-	//ID3D11ShaderResourceView* srv = textureSRV.get();
-	ID3D11ShaderResourceView* srv = picsrv.get();
+	ID3D11ShaderResourceView* srv = textureSRV.get();
+	//ID3D11ShaderResourceView* srv = picsrv.get();
 	
 	d3dContext->PSSetShaderResources(0, 1, &srv);
 
@@ -294,7 +300,7 @@ void WindowsCaptureBase::OnFrameArrived(winrt::Windows::Graphics::Capture::Direc
 			winrt::com_ptr<ID3D11ShaderResourceView> srv;
 			HR(d3dDevice->CreateShaderResourceView(texture.get(), nullptr, srv.put()));
 
-			ScaleImage_GPU(srv);
+			ScaleImage_GPU(srv, LastSize.Width, LastSize.Height);
 
 
 			Microsoft::WRL::ComPtr< ID3D11Texture2D> des{ nullptr };

@@ -28,8 +28,8 @@ PSInput VSMain(VSInput input) {
 float4 PSMain(PSInput input) : SV_TARGET
 {
     float2 uv = (input.uv - float2(offsetX, offsetY)) / float2(scaleX, scaleY);
-    //if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return float4(0,0,0,1);
+    if (uv.x < 0 || uv.x > 1 || uv.y < 0 || uv.y > 1) return float4(0,0,0,1);
     
-    //return inputTex.Sample(linearSampler, uv);
-    return float4(0, 0.3, 0.5, 1);
+    return inputTex.Sample(linearSampler, uv);
+    //return float4(0, 0, 1, 1);
 }
